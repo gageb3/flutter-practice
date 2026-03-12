@@ -1,10 +1,12 @@
+import 'package:expense_tracker/models/categories.dart';
+
 // Set variables for use later
 class Expense {
   final String id;
   final int amountCents;
   final DateTime date;
   final String? description;
-  final String? category;
+  final Category category;
 
   const Expense({
     required this.id,
@@ -20,7 +22,8 @@ class Expense {
     // toStringAsFixed = decimal point representation of number
     final dollars = (amountCents / 100).toStringAsFixed(2);
     final dateStr = date.toString().substring(0, 10); // 2025-07-10
+    final categoryStr = category.name;
 
-    return '$dollars - $description (${category ?? "uncategorized"}) - $dateStr [id: $id]';
+    return '$dollars - $description ($categoryStr) - $dateStr [id: $id]';
   }
 }

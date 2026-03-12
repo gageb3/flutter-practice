@@ -1,50 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:expense_tracker/models/expense.dart';
 import 'managers/expense_manager.dart';
+import 'models/categories.dart';
+import 'package:expense_tracker/models/recurring_expense.dart';
 
 void main() {
   final manager = ExpenseManager();
 
-  final expense1 = Expense(
-    id: '001',
-    amountCents: 3599,
-    date: DateTime(2025, 7, 10),
-    description: 'Weekly groceries',
-    category: 'Food',
+  // Create a recurring expense object with its details
+  final recurring = RecurringExpense(
+    id: 'r001',
+    amountCents: 1000,
+    date: DateTime(2025, 7, 1),
+    category: Category.food,
+    description: 'Weekly snack',
+    frequency: Frequency.weekly,
+    occurrences: 4, // repeats 4 times
   );
 
-  final expense2 = Expense(
-    id: '002',
-    amountCents: 1499,
-    date: DateTime(2025, 7, 12),
-    description: 'Coffee',
-    category: 'Beverage',
-  );
+  manager.addRecurringExpense(recurring);
 
-  final expense3 = Expense(
-    id: '003',
-    amountCents: 1899,
-    date: DateTime(2025, 7, 11),
-    description: 'Pizza',
-    category: 'Food',
-  );
-
-  manager.addExpense(expense1);
-  manager.addExpense(expense2);
-  manager.addExpense(expense3);
-
+  // Print all expenses
   final expenses = manager.getAllExpenses();
-
   for (var expense in expenses) {
     print(expense);
   }
 
+  // Print total in dollars with text
+  final totalCents = manager.getTotalExpenses();
+  final totalDollars = totalCents / 100;
+  print("Total: \$${totalDollars.toStringAsFixed(2)}");
+
   runApp(
-    // This sets up the material design system, highly recommended
     MaterialApp(
       title: "Expense Tracker",
       debugShowCheckedModeBanner: false,
-      // Blueprint for a screen; provides predefined slots(appBar, body)
       home: Scaffold(
         appBar: AppBar(title: Text('Expense Tracker')),
         body: Center(child: Text('App is starting...')),

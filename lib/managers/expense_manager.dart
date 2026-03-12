@@ -1,4 +1,7 @@
 import 'package:expense_tracker/models/expense.dart';
+import 'package:expense_tracker/models/categories.dart';
+import 'package:expense_tracker/models/recurring_expense.dart';
+import 'package:expense_tracker/models/monthly_summary.dart';
 
 class ExpenseManager {
   // private field that holds expense objects
@@ -26,7 +29,7 @@ class ExpenseManager {
   }
 
   // Manual loop version
-  List<Expense> getExpensesByCategoryLoop(String category) {
+  List<Expense> getExpensesByCategoryLoop(Category category) {
     List<Expense> categoryList = [];
 
     for (var expense in _expenses) {
@@ -39,7 +42,7 @@ class ExpenseManager {
 
   // where()
   // Return a new list of expenses from _expenses where each expense's category equals the category passed into the method.
-  List<Expense> getExpensesByCategory(String category) {
+  List<Expense> getExpensesByCategory(Category category) {
     return _expenses.where((expense) => expense.category == category).toList();
   }
 
@@ -53,13 +56,13 @@ class ExpenseManager {
   }
 
   // method that calculates total spending per category
-  Map<String, int> getTotalFromCategory() {
+  Map<Category, int> getTotalFromCategory() {
     // Map that stores category, total cents spent
-    final Map<String, int> totals = {};
+    final Map<Category, int> totals = {};
 
     for (var expense in _expenses) {
       // Get the category, if null, use "uncategorized"
-      final category = expense.category ?? "uncategorized";
+      final category = expense.category;
 
       // if category has not been added to the map yet, create entry starting at 0 cents
       if (!totals.containsKey(category)) {
@@ -126,7 +129,7 @@ class ExpenseManager {
   }
 
   // Gives total amount spent for a category in the month.
-  int getTotalForCategoryInMonth(int year, int month, String category) {
+  int getTotalForCategoryInMonth(int year, int month, Category category) {
     int total = 0;
     for (var expense in _expenses) {
       if (expense.date.year == year &&
@@ -171,5 +174,47 @@ class ExpenseManager {
       monthlyGroups[key]!.add(expense);
     }
     return monthlyGroups;
+  }
+
+  // Create method that accepts RecurringExpense, generates its instances, and adds them to _expenses
+  void addRecurringExpense(RecurringExpense recurringExpense) {
+    final instances = recurringExpense.generateInstances();
+
+    for (var expense in instances) {
+      _expenses.add(expense);
+    }
+  }
+
+  // Create a method that returns the average expense amount
+  double getAverageExpense() {
+    if (_expenses.isEmpty) {
+      return 0;
+    }
+    final total = getTotalExpenses();
+    return total / _expenses.length;
+  }
+
+  // Create a method that retrieves all expenses for the month, calcs total spending for that list, counts how many expenses are in the list, calcs totals per categor;y, and creates/returns a MonthlySummary object
+  MonthlySummary getMonthlySummary(int year, int month) {
+    final monthlyExpenses = getMonthlyExpenses(year, month);
+
+    int total = 0;
+    final Map<Category, int> categoryTotals = {};
+
+    for (var expense in monthlyExpenses) {
+      total += expense.amountCents;
+
+      final category = expense.category;
+
+      categoryTotals[category] =
+          (categoryTotals[category] ?? 0) + expense.amountCents;
+    }
+    return MonthlySummary(
+      year: year,
+      month: month,
+      totalCents: total,
+      expenseCount: monthlyExpenses.length,
+      categoryTotals: categoryTotals,
+    );
   }
 }
